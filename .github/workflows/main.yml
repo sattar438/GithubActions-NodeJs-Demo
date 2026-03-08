@@ -1,0 +1,26 @@
+name: workflow to run the nodejs application
+on: # multiple triggers when the event runs
+ workflow_dispatch:
+ push:
+  branches:
+    - master
+ pull_request:
+  branches:
+    - master
+jobs:
+  job1:
+    runs-on: ubuntu-latest
+    steps:
+    - name: clone the repo
+      uses: actions/checkout@v6
+    - name: Install nodejs
+      uses: actions/setup-node@v6 
+      with:
+        node version: 18
+        cache: 'npm'
+    - name: Install node dependencies
+      run: npm ci
+    - name: Execute the test cases
+      run: npm test
+    - name: Build the nodejs Build
+      run: npm run build   
