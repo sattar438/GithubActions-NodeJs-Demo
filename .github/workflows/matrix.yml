@@ -1,0 +1,39 @@
+name: workflow to run the matrix nodejs application
+on: # multiple triggers when the event runs
+ workflow_dispatch:
+ push:
+  branches:
+    - master
+ pull_request:
+  branches:
+    - master
+jobs:
+  job1:
+    continue-on-error: true
+    strategy: 
+     matrix:  # it is like a loop to repeat the same steps on each operating system
+      operating_system: [ubuntu-latest, windows-latest]
+      artifact_name: [artifact-node-ubuntu,artifact-node-windows]
+      exclude: # dont execute this combination
+      - operating_system: ubuntu-latest
+        artifact_name: artifact-node-windows
+    runs-on: ${{ matrix.operating_system }}
+    steps:
+    - name: clone the repo
+      uses: actions/checkout@v6
+    - name: Install nodejs
+      uses: actions/setup-node@v6 
+      with:
+        node version: 18
+        cache: 'npm'
+    - name: Install node dependencies
+      run: npm ci
+    - name: Execute the test cases
+      run: npm test
+    - name: Build the nodejs Build
+      run: npm run build  
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.artifact_name }}# we need to add variable which changes as per OS
+        path: dist/
